@@ -17,6 +17,6 @@ A new Flutter project.
   s.dependency 'ZDCChat'
   s.dependency 'Flutter'
 
-  s.ios.deployment_target = '9.0'
+  s.ios.deployment_target = '8.0'
 end
 

@@ -13,7 +13,7 @@ PODS:
     - ZDCChat/API
 
 DEPENDENCIES:
-  - Flutter (from `.symlinks/flutter/ios-release`)
+  - Flutter (from `.symlinks/flutter/ios`)
   - flutter_zendesk (from `.symlinks/plugins/flutter_zendesk/ios`)
 
 SPEC REPOS:
@@ -22,15 +22,15 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: ".symlinks/flutter/ios-release"
+    :path: ".symlinks/flutter/ios"
   flutter_zendesk:
     :path: ".symlinks/plugins/flutter_zendesk/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  flutter_zendesk: 2fc8414659f76cd55f0339633444a113c31005ba
+  flutter_zendesk: 60bf30543a422b2f012b85223d30200c33912fa1
   ZDCChat: 022351259c723b713bc701f71a244e4416a92257
 
-PODFILE CHECKSUM: 4a0da503b80b52f11dcc28a69e09dc7a5f384f39
+PODFILE CHECKSUM: 5a6c620c47ca3dfa986852b84fb75646f7e3abaa
 
 COCOAPODS: 1.7.4
