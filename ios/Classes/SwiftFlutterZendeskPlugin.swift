@@ -26,7 +26,7 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
 
             ZDCChat.initialize(withAccountKey: initArgs["accountKey"])
       
-            result(true)
+            result(nil)
         
         
         
@@ -51,17 +51,18 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
             }
         
             ZDCChat.start {config in
-                config?.department = chatArgs["department"]
                 config?.visitorPathOne = chatArgs["appName"]
                 config?.preChatDataRequirements.name = .required
                 config?.preChatDataRequirements.email = .required
                 config?.preChatDataRequirements.department = .required
                 config?.preChatDataRequirements.message = .required
+                config?.department = chatArgs["department"]
+               
             }
         
 
         
-        result(true)
+        result(nil)
 
     }
     

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
+import 'package:flutter_zendesk/flutter_zendesk.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_zendesk_example/logo_live_chat_header.dart';
 
@@ -13,34 +13,17 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  String ZENDESK_CHAT_KEY =  "4kSNfs8T5QbKBJHrW6Ciw7TdfOWYBW4p";
   String APP_TECH_SUPPORT='App tech support';
   String APP_NAME = 'Wella Professionals ,0.0.1';
 
   @override
   void initState() {
     super.initState();
-   // initPlatformState();
+    FlutterZendesk().init(accountKey: ZENDESK_CHAT_KEY);
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-     
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
