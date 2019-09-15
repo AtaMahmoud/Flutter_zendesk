@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_zendesk_example/logo_live_chat_header.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,11 +13,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  String APP_TECH_SUPPORT='App tech support';
+  String APP_NAME = 'Wella Professionals ,0.0.1';
 
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+   // initPlatformState();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -47,7 +50,12 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: LogoAndLiveChatHeader(
+                  {
+                  "department":APP_TECH_SUPPORT,
+                  "appName":APP_NAME
+                }
+                ),
         ),
       ),
     );

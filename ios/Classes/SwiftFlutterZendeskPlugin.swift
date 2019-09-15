@@ -21,21 +21,12 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
   }
  
     private func setUp(_ call:FlutterMethodCall,result: @escaping FlutterResult){
-        
-        do {
-            let json = call.arguments as! String
-            let jsonDecoder = JSONDecoder()
-            let initArgs = try jsonDecoder.decode([String:String].self, from: json.data(using: .utf8)!)
-            print(initArgs["accountKey"]!)
+
+            let initArgs = call.arguments as! Dictionary<String, String>
+
             ZDCChat.initialize(withAccountKey: initArgs["accountKey"])
-        } catch {
-
-                print("FlutterZendeskPlugin error:" + error.localizedDescription)
-
-        }
-
       
-        result(nil)
+            result(true)
         
         
         
@@ -43,21 +34,13 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
     
     
     private func startChat(_ call:FlutterMethodCall,result: @escaping FlutterResult){
-        
-        do {
-            let json = call.arguments as! String
-            let jsonDecoder = JSONDecoder()
-            let chatArgs = try jsonDecoder.decode([String:String].self, from: json.data(using: .utf8)!)
 
-            
-            if(!chatArgs["userName"]!.isEmpty && !chatArgs["email"]!.isEmpty ){
-                
-                let config = ZDCConfig()
-                
-                config.preChatDataRequirements.name = .required
-                config.preChatDataRequirements.email = .required
-                config.preChatDataRequirements.department = .required
-                config.preChatDataRequirements.message = .required
+            let chatArgs = call.arguments as! Dictionary<String, String>
+        
+            var userName = chatArgs["userName"] ?? "";
+            var email = chatArgs["email"] ?? "";
+        
+            if(userName.count > 0 && email.count > 2){
                 
                 ZDCChat.updateVisitor { user in
                     user?.phone = chatArgs["phoneNumber"]!
@@ -65,23 +48,20 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
                     user?.email = chatArgs["email"]!
                 }
                 
-                ZDCChat.start { config in
-                    config?.department = chatArgs["department"]
-                    config?.visitorPathOne = chatArgs["appName"]
-                    config?.preChatDataRequirements = config?.preChatDataRequirements
-                }
-                
-                
             }
-            
-            
-        } catch {
-            
-            print("FlutterZendeskPlugin error:" + error.localizedDescription)
-            
-        }
         
-        result(nil)
+            ZDCChat.start {config in
+                config?.department = chatArgs["department"]
+                config?.visitorPathOne = chatArgs["appName"]
+                config?.preChatDataRequirements.name = .required
+                config?.preChatDataRequirements.email = .required
+                config?.preChatDataRequirements.department = .required
+                config?.preChatDataRequirements.message = .required
+            }
+        
+
+        
+        result(true)
 
     }
     
