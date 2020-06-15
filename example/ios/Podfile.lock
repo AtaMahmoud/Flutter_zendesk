@@ -2,23 +2,32 @@ PODS:
   - Flutter (1.0.0)
   - flutter_zendesk (0.0.1):
     - Flutter
-    - ZDCChat
-  - ZDCChat (1.3.7.1):
-    - ZDCChat/API (= 1.3.7.1)
-    - ZDCChat/Localization (= 1.3.7.1)
-    - ZDCChat/UI (= 1.3.7.1)
-  - ZDCChat/API (1.3.7.1)
-  - ZDCChat/Localization (1.3.7.1)
-  - ZDCChat/UI (1.3.7.1):
-    - ZDCChat/API
+    - ZendeskChatSDK
+  - ZendeskChatProvidersSDK (2.5.1)
+  - ZendeskChatSDK (2.5.1):
+    - ZendeskChatProvidersSDK (~> 2.5.1)
+    - ZendeskMessagingSDK (~> 3.4.0)
+  - ZendeskCommonUISDK (4.4.0):
+    - ZendeskSDKConfigurationsSDK (~> 1.1.5)
+  - ZendeskMessagingAPISDK (3.4.0):
+    - ZendeskSDKConfigurationsSDK (~> 1.1.5)
+  - ZendeskMessagingSDK (3.4.0):
+    - ZendeskCommonUISDK (~> 4.4.0)
+    - ZendeskMessagingAPISDK (~> 3.4.0)
+  - ZendeskSDKConfigurationsSDK (1.1.5)
 
 DEPENDENCIES:
   - Flutter (from `.symlinks/flutter/ios`)
   - flutter_zendesk (from `.symlinks/plugins/flutter_zendesk/ios`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
-    - ZDCChat
+  trunk:
+    - ZendeskChatProvidersSDK
+    - ZendeskChatSDK
+    - ZendeskCommonUISDK
+    - ZendeskMessagingAPISDK
+    - ZendeskMessagingSDK
+    - ZendeskSDKConfigurationsSDK
 
 EXTERNAL SOURCES:
   Flutter:
@@ -28,9 +37,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  flutter_zendesk: 60bf30543a422b2f012b85223d30200c33912fa1
-  ZDCChat: 022351259c723b713bc701f71a244e4416a92257
+  flutter_zendesk: 4e574946c9a75d5da33f706a71fdbf3aed48d766
+  ZendeskChatProvidersSDK: 20fba23d07d6c1c5effb5a4348e758a11280dea3
+  ZendeskChatSDK: fac3c02d89ceb1e6d408c1cd84ec60931d4f4c53
+  ZendeskCommonUISDK: e6fa1e5f9ecb0a23038d60735875d3b04542483b
+  ZendeskMessagingAPISDK: 99b3fc16a234794fa52e85fd39ed4311bb7ff72c
+  ZendeskMessagingSDK: f4231f542fc14eec85e9c01281310192888cc1f7
+  ZendeskSDKConfigurationsSDK: 0c610c22c9e3cafcd31591344b8cc3b4398e49b2
 
-PODFILE CHECKSUM: 5a6c620c47ca3dfa986852b84fb75646f7e3abaa
+PODFILE CHECKSUM: 10f5b7cee0700431871175384618e328f8ae2812
 
-COCOAPODS: 1.7.4
+COCOAPODS: 1.9.1

@@ -13,8 +13,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  String ZENDESK_CHAT_KEY =  "4kSNfs8T5QbKBJHrW6Ciw7TdfOWYBW4p";
-  String APP_TECH_SUPPORT='App tech support';
+  String ZENDESK_CHAT_KEY = "4kSNfs8T5QbKBJHrW6Ciw7TdfOWYBW4p";
+  String APP_TECH_SUPPORT = 'App tech support';
   String APP_NAME = 'Wella Professionals ,0.0.1';
 
   @override
@@ -22,8 +22,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     FlutterZendesk().init(accountKey: ZENDESK_CHAT_KEY);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +32,7 @@ class _MyAppState extends State<MyApp> {
         ),
         body: Center(
           child: LogoAndLiveChatHeader(
-                  {
-                  "department":APP_TECH_SUPPORT,
-                  "appName":APP_NAME
-                }
-                ),
+              {"department": APP_TECH_SUPPORT, "appName": APP_NAME}),
         ),
       ),
     );
