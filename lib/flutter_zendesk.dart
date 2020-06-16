@@ -10,7 +10,7 @@ class FlutterZendesk {
         .invokeMethod('init', <String, String>{"accountKey": accountKey});
   }
 
-  Future<void> startChat(Map<String,String>chatConfigs) async {
+  Future<void> startChat(Map<String, String> chatConfigs) async {
     await _channel.invokeMethod("startChat", chatConfigs);
   }
 }

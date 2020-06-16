@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:flutter_zendesk/flutter_zendesk.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_zendesk_example/logo_live_chat_header.dart';
 
 void main() => runApp(MyApp());
@@ -13,9 +11,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  String ZENDESK_CHAT_KEY = "4kSNfs8T5QbKBJHrW6Ciw7TdfOWYBW4p";
-  String APP_TECH_SUPPORT = 'App tech support';
-  String APP_NAME = 'Wella Professionals ,0.0.1';
+  String ZENDESK_CHAT_KEY = "key";
+  String DEPARTMENT = 'department';
+  String APP_NAME = 'app name';
+  String APP_PATH = 'path, 0.0(0)';
+  String EMAIL = 'user@mail.com';
+  String NAME = 'user';
 
   @override
   void initState() {
@@ -31,8 +32,13 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: LogoAndLiveChatHeader(
-              {"department": APP_TECH_SUPPORT, "appName": APP_NAME}),
+          child: LogoAndLiveChatHeader({
+            "department": DEPARTMENT,
+            "appName": APP_NAME,
+            "visitorPath": APP_PATH,
+            "email": EMAIL,
+            "userName": NAME,
+          }),
         ),
       ),
     );
