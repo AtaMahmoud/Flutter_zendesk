@@ -5,6 +5,8 @@ import ChatProvidersSDK
 import MessagingSDK
 
 public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
+    
+    var accountKey = ""
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_zendesk", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterZendeskPlugin()
@@ -25,7 +27,7 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
     private func setUp(_ call:FlutterMethodCall,result: @escaping FlutterResult){
         
         guard let initArgs = call.arguments as? [String: String] else { return }
-        Chat.initialize(accountKey: initArgs["accountKey"] ?? "")
+        accountKey = initArgs["accountKey"] ?? ""
         result(nil)
     }
     
@@ -46,28 +48,27 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
         let name = configs["userName"] ?? ""
         let email = configs["email"] ?? ""
         
-        let formConfiguration = ChatFormConfiguration(name: .required,
-                                                      email: .required,
-                                                      phoneNumber: .hidden,
-                                                      department: .required)
-        let chatConfiguration = ChatConfiguration()
-        chatConfiguration.isPreChatFormEnabled = false
-        chatConfiguration.isOfflineFormEnabled = true
-        chatConfiguration.preChatFormConfiguration = formConfiguration
-        
-        
         let chatAPIConfiguration = ChatAPIConfiguration()
         chatAPIConfiguration.department = department
         chatAPIConfiguration.tags = [brand]
         
         chatAPIConfiguration.visitorInfo = VisitorInfo(name: name, email: email, phoneNumber: "")
         
+        let formConfiguration = ChatFormConfiguration(name: .required,
+                                                      email: .required,
+                                                      phoneNumber: .hidden,
+                                                      department: .required)
+        let chatConfiguration = ChatConfiguration()
+        chatConfiguration.isPreChatFormEnabled = chatAPIConfiguration.visitorInfo == nil
+        chatConfiguration.isAgentAvailabilityEnabled = true
+        chatConfiguration.isOfflineFormEnabled = true
+        chatConfiguration.preChatFormConfiguration = formConfiguration
+        
+        Chat.initialize(accountKey: accountKey)
+        
         chatAPIConfiguration.visitorPathOne = brand
-        
         chatAPIConfiguration.visitorPathTwo = "Mobile Chat connected"
-        
         let path =  VisitorPath(title: visitorPath)
-        
         Chat.profileProvider?.trackVisitorPath(path)
         
         Chat.instance?.configuration = chatAPIConfiguration
@@ -98,7 +99,11 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
     
     @objc private func dismissChatVC() {
         Chat.chatProvider?.endChat()
+        Chat.instance?.clearCache()
+        Chat.instance?.resetIdentity()
+        
         UIApplication.shared.windows.first!.rootViewController!.dismiss(animated: true, completion: nil)
     }
     
 }
+
