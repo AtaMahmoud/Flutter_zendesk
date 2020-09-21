@@ -102,7 +102,7 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
         chatVC = nil
         Chat.chatProvider?.endChat()
         Chat.instance?.clearCache()
-        Chat.instance?.resetIdentity()
+        Chat.instance?.resetIdentity(){}
         
         UIApplication.shared.windows.first!.rootViewController!.dismiss(animated: true, completion: nil)
     }
