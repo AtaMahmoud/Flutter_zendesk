@@ -7,6 +7,7 @@ import MessagingSDK
 public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
     
     var accountKey = ""
+    var chatVC: UIViewController?
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_zendesk", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterZendeskPlugin()
@@ -33,7 +34,7 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
     
     private func startChat(_ call:FlutterMethodCall,result: @escaping FlutterResult){
         
-        guard let chatArgs = call.arguments as? [String: String] else { return }
+        guard let chatArgs = call.arguments as? [String: String], chatVC == nil else { return }
         if let chatVC = configChat(configs: chatArgs){
             fireChat(chatVC: chatVC)
         }
@@ -76,7 +77,7 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
         do {
             let chatEngine = try ChatEngine.engine()
             
-            let chatVC = try Messaging.instance.buildUI(engines: [chatEngine], configs: [chatConfiguration])
+            chatVC = try Messaging.instance.buildUI(engines: [chatEngine], configs: [chatConfiguration])
             return chatVC
         } catch {
             return nil
@@ -98,6 +99,7 @@ public class SwiftFlutterZendeskPlugin: NSObject, FlutterPlugin {
     }
     
     @objc private func dismissChatVC() {
+        chatVC = nil
         Chat.chatProvider?.endChat()
         Chat.instance?.clearCache()
         Chat.instance?.resetIdentity()
