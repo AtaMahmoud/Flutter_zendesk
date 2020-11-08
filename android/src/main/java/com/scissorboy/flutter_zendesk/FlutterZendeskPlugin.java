@@ -34,6 +34,9 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
         this.activity = activity;
     }
 
+    public FlutterZendeskPlugin() {
+    }
+
     /**
      * Plugin registration.
      */
@@ -102,14 +105,14 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
         ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
         chatProvider.setDepartment((String) call.argument("department"), null);
 
-        if (activity == null) {
-            return;
-        }
+//        if (activity == null) {
+//            return;
+//        }
 
         MessagingActivity
                 .builder()
                 .withEngines(ChatEngine.engine())
-                .show(activity, chatConfiguration);
+                .show(applicationContext, chatConfiguration);
 
         result.success(true);
     }
