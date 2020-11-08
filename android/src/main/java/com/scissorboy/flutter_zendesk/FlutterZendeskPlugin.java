@@ -1,34 +1,62 @@
 package com.scissorboy.flutter_zendesk;
 
-import com.zopim.android.sdk.api.ZopimChat;
-import com.zopim.android.sdk.model.VisitorInfo;
-import com.zopim.android.sdk.prechat.PreChatForm;
-import com.zopim.android.sdk.prechat.ZopimChatActivity;
-
+import android.app.Activity;
+import android.content.Context;
 import androidx.annotation.NonNull;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.BinaryMessenger;
+import zendesk.chat.Chat;
+import zendesk.chat.ChatConfiguration;
+import zendesk.chat.ChatEngine;
+import zendesk.chat.ChatProvider;
+import zendesk.chat.PreChatFormFieldStatus;
+import zendesk.chat.ProfileProvider;
+import zendesk.chat.VisitorInfo;
+import zendesk.messaging.MessagingActivity;
 
 /**
  * FlutterZendeskPlugin
  */
 
-public class FlutterZendeskPlugin implements MethodCallHandler {
-    private final Registrar registrar;
+public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
 
-    private FlutterZendeskPlugin(Registrar registrar) {
-        this.registrar = registrar;
+    private Registrar registrar;
+    private Context applicationContext;
+    private Activity activity;
+    private MethodChannel methodChannel;
+
+    public FlutterZendeskPlugin(Activity activity) {
+        this.activity = activity;
     }
 
     /**
      * Plugin registration.
      */
     public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_zendesk");
-        channel.setMethodCallHandler(new FlutterZendeskPlugin(registrar));
+        FlutterZendeskPlugin plugin = new FlutterZendeskPlugin(registrar.activity());
+        plugin.onAttachedToEngine(registrar.context(), registrar.messenger());
+    }
+
+    public void onAttachedToEngine(FlutterPluginBinding binding) {
+        onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
+    }
+
+    private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
+        this.applicationContext = applicationContext;
+        methodChannel = new MethodChannel(messenger, "flutter_zendesk");
+        methodChannel.setMethodCallHandler(this);
+    }
+
+    @Override
+    public void onDetachedFromEngine(FlutterPluginBinding binding) {
+        applicationContext = null;
+        methodChannel.setMethodCallHandler(null);
+        methodChannel = null;
     }
 
     @Override
@@ -47,37 +75,43 @@ public class FlutterZendeskPlugin implements MethodCallHandler {
     }
 
     private void init(MethodCall call, Result result) {
-        ZopimChat.init((String) call.argument("accountKey"));
+        Chat.INSTANCE.init(applicationContext, String.valueOf(call.argument("accountKey")));
         result.success(true);
     }
 
-
     private void startChat(MethodCall call, Result result) {
-        PreChatForm preChatForm = new PreChatForm.Builder()
-                .name(PreChatForm.Field.REQUIRED)
-                .email(PreChatForm.Field.REQUIRED)
-                .department(PreChatForm.Field.REQUIRED)
-                .message(PreChatForm.Field.REQUIRED)
+
+        ChatConfiguration chatConfiguration = ChatConfiguration.builder()
+                .withNameFieldStatus(PreChatFormFieldStatus.REQUIRED)
+                .withEmailFieldStatus(PreChatFormFieldStatus.REQUIRED)
+                .withDepartmentFieldStatus(PreChatFormFieldStatus.REQUIRED)
+                .withAgentAvailabilityEnabled(false)
                 .build();
 
-        if (call.hasArgument("userName") && call.hasArgument("email")) {
-            VisitorInfo visitorInfo = new VisitorInfo.Builder()
-                    .name((String) call.argument("userName"))
-                    .email((String) call.argument("email"))
-                    .phoneNumber((String) call.argument("phoneNumber"))
-                    .build();
 
-            ZopimChat.setVisitorInfo(visitorInfo);
+        if (call.hasArgument("userName") && call.hasArgument("email")) {
+            ProfileProvider profileProvider = Chat.INSTANCE.providers().profileProvider();
+            VisitorInfo visitorInfo = VisitorInfo.builder()
+                    .withName((String) call.argument("userName"))
+                    .withEmail((String) call.argument("email"))
+                    .withPhoneNumber((String) call.argument("phoneNumber"))
+                    .build();
+            profileProvider.setVisitorInfo(visitorInfo, null);
         }
 
+        ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
+        chatProvider.setDepartment((String) call.argument("department"), null);
 
-        ZopimChat.SessionConfig config = new ZopimChat.SessionConfig()
-                .visitorPathOne((String) call.argument("appName"))
-                .preChatForm(preChatForm)
-                .department((String) call.argument("department"));
+        if (activity == null) {
+            return;
+        }
 
+        MessagingActivity
+                .builder()
+                .withEngines(ChatEngine.engine())
+                .show(activity, chatConfiguration);
 
-        ZopimChatActivity.startActivity(registrar.activeContext(), config);
         result.success(true);
     }
 }
+
