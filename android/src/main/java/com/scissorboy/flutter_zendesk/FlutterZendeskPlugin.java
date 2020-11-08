@@ -23,45 +23,56 @@ import zendesk.messaging.MessagingActivity;
  * FlutterZendeskPlugin
  */
 
-public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
+public class FlutterZendeskPlugin implements MethodCallHandler {
 
-    private Registrar registrar;
+//    private Registrar registrar;
+//    private Context applicationContext;
+//    private MethodChannel methodChannel;
+//
+//    public FlutterZendeskPlugin() {
+//    }
+//
+//    /**
+//     * Plugin registration.
+//     */
+//    public static void registerWith(Registrar registrar) {
+//        FlutterZendeskPlugin plugin = new FlutterZendeskPlugin();
+//        plugin.onAttachedToEngine(registrar.context(), registrar.messenger());
+//    }
+//
+//    public void onAttachedToEngine(FlutterPluginBinding binding) {
+//        onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
+//    }
+//
+//    private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
+//        this.applicationContext = applicationContext;
+//        methodChannel = new MethodChannel(messenger, "flutter_zendesk");
+//        methodChannel.setMethodCallHandler(this);
+//    }
+//
+//    @Override
+//    public void onDetachedFromEngine(FlutterPluginBinding binding) {
+//        applicationContext = null;
+//        methodChannel.setMethodCallHandler(null);
+//        methodChannel = null;
+//    }
+
+    private final Registrar registrar;
     private Context applicationContext;
-    private Activity activity;
-    private MethodChannel methodChannel;
 
-    public FlutterZendeskPlugin(Activity activity) {
-        this.activity = activity;
-    }
+    private FlutterZendeskPlugin(Registrar registrar) {
+        this.registrar = registrar;
+        applicationContext = registrar.activity();
 
-    public FlutterZendeskPlugin() {
     }
 
     /**
      * Plugin registration.
      */
     public static void registerWith(Registrar registrar) {
-        FlutterZendeskPlugin plugin = new FlutterZendeskPlugin(registrar.activity());
-        plugin.onAttachedToEngine(registrar.context(), registrar.messenger());
+        final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_zendesk");
+        channel.setMethodCallHandler(new FlutterZendeskPlugin(registrar));
     }
-
-    public void onAttachedToEngine(FlutterPluginBinding binding) {
-        onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
-    }
-
-    private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
-        this.applicationContext = applicationContext;
-        methodChannel = new MethodChannel(messenger, "flutter_zendesk");
-        methodChannel.setMethodCallHandler(this);
-    }
-
-    @Override
-    public void onDetachedFromEngine(FlutterPluginBinding binding) {
-        applicationContext = null;
-        methodChannel.setMethodCallHandler(null);
-        methodChannel = null;
-    }
-
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         switch (call.method) {
@@ -104,10 +115,6 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
 
         ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
         chatProvider.setDepartment((String) call.argument("department"), null);
-
-//        if (activity == null) {
-//            return;
-//        }
 
         MessagingActivity
                 .builder()
