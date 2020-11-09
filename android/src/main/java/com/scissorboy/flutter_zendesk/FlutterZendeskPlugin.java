@@ -24,20 +24,18 @@ import zendesk.messaging.MessagingActivity;
  * FlutterZendeskPlugin
  */
 
-public class FlutterZendeskPlugin implements MethodCallHandler {
+public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
 
-    private final Registrar registrar;
+    private Context context;
+    private MethodChannel methodChannel;
 
-    private FlutterZendeskPlugin(Registrar registrar) {
-        this.registrar = registrar;
-    }
 
     /**
      * Plugin registration.
      */
     public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_zendesk");
-        channel.setMethodCallHandler(new FlutterZendeskPlugin(registrar));
+        FlutterZendeskPlugin flutterZendeskPlugin = new FlutterZendeskPlugin();
+        flutterZendeskPlugin.onAttachedToEngine(registrar.activeContext(),registrar.messenger());
     }
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
@@ -54,8 +52,25 @@ public class FlutterZendeskPlugin implements MethodCallHandler {
         }
     }
 
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+        onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        this.context = null;
+        methodChannel = null;
+    }
+
+    private void onAttachedToEngine(Context context, BinaryMessenger messenger) {
+        this.context = context;
+        methodChannel = new MethodChannel(messenger, "flutter_zendesk");
+        methodChannel.setMethodCallHandler(this);
+    }
+
     private void init(MethodCall call, Result result) {
-        Chat.INSTANCE.init(registrar.activeContext(), String.valueOf(call.argument("accountKey")));
+        Chat.INSTANCE.init(context, String.valueOf(call.argument("accountKey")));
         result.success(true);
     }
 
@@ -87,7 +102,7 @@ public class FlutterZendeskPlugin implements MethodCallHandler {
         MessagingActivity
                 .builder()
                 .withEngines(ChatEngine.engine())
-                .show(registrar.activeContext(), chatConfiguration);
+                .show(context, chatConfiguration);
 
         result.success(true);
     }
