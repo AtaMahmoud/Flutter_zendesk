@@ -13,6 +13,7 @@ import io.flutter.plugin.common.BinaryMessenger;
 import zendesk.chat.Chat;
 import zendesk.chat.ChatConfiguration;
 import zendesk.chat.ChatEngine;
+import zendesk.chat.ChatMenuAction;
 import zendesk.chat.ChatProvider;
 import zendesk.chat.PreChatFormFieldStatus;
 import zendesk.chat.ProfileProvider;
@@ -25,45 +26,10 @@ import zendesk.messaging.MessagingActivity;
 
 public class FlutterZendeskPlugin implements MethodCallHandler {
 
-//    private Registrar registrar;
-//    private Context applicationContext;
-//    private MethodChannel methodChannel;
-//
-//    public FlutterZendeskPlugin() {
-//    }
-//
-//    /**
-//     * Plugin registration.
-//     */
-//    public static void registerWith(Registrar registrar) {
-//        FlutterZendeskPlugin plugin = new FlutterZendeskPlugin();
-//        plugin.onAttachedToEngine(registrar.context(), registrar.messenger());
-//    }
-//
-//    public void onAttachedToEngine(FlutterPluginBinding binding) {
-//        onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
-//    }
-//
-//    private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
-//        this.applicationContext = applicationContext;
-//        methodChannel = new MethodChannel(messenger, "flutter_zendesk");
-//        methodChannel.setMethodCallHandler(this);
-//    }
-//
-//    @Override
-//    public void onDetachedFromEngine(FlutterPluginBinding binding) {
-//        applicationContext = null;
-//        methodChannel.setMethodCallHandler(null);
-//        methodChannel = null;
-//    }
-
     private final Registrar registrar;
-    private Context applicationContext;
 
     private FlutterZendeskPlugin(Registrar registrar) {
         this.registrar = registrar;
-        applicationContext = registrar.activity();
-
     }
 
     /**
@@ -89,19 +55,21 @@ public class FlutterZendeskPlugin implements MethodCallHandler {
     }
 
     private void init(MethodCall call, Result result) {
-        Chat.INSTANCE.init(applicationContext, String.valueOf(call.argument("accountKey")));
+        Chat.INSTANCE.init(registrar.activeContext(), String.valueOf(call.argument("accountKey")));
         result.success(true);
     }
 
     private void startChat(MethodCall call, Result result) {
 
         ChatConfiguration chatConfiguration = ChatConfiguration.builder()
+
                 .withNameFieldStatus(PreChatFormFieldStatus.REQUIRED)
                 .withEmailFieldStatus(PreChatFormFieldStatus.REQUIRED)
                 .withDepartmentFieldStatus(PreChatFormFieldStatus.REQUIRED)
                 .withAgentAvailabilityEnabled(false)
+                .withTranscriptEnabled(false)
+                .withChatMenuActions()
                 .build();
-
 
         if (call.hasArgument("userName") && call.hasArgument("email")) {
             ProfileProvider profileProvider = Chat.INSTANCE.providers().profileProvider();
@@ -119,7 +87,7 @@ public class FlutterZendeskPlugin implements MethodCallHandler {
         MessagingActivity
                 .builder()
                 .withEngines(ChatEngine.engine())
-                .show(applicationContext, chatConfiguration);
+                .show(registrar.activeContext(), chatConfiguration);
 
         result.success(true);
     }

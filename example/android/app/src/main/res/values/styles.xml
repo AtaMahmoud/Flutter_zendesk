@@ -5,4 +5,10 @@
              Flutter draws its first frame -->
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>
+    <style name="CustomTheme" parent="Theme.MaterialComponents.Light">
+        <item name="colorPrimary">@color/my_color_primary</item>
+        <item name="colorPrimaryDark">@color/my_color_primary_dark</item>
+        <item name="colorAccent">@color/my_color_accent</item>
+
+    </style>
 </resources>
