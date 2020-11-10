@@ -2,7 +2,12 @@ package com.scissorboy.flutter_zendesk;
 
 import android.app.Activity;
 import android.content.Context;
+
 import androidx.annotation.NonNull;
+
+import io.flutter.Log;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -24,7 +29,7 @@ import zendesk.messaging.MessagingActivity;
  * FlutterZendeskPlugin
  */
 
-public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
+public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
 
     private Context context;
     private MethodChannel methodChannel;
@@ -35,8 +40,9 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
      */
     public static void registerWith(Registrar registrar) {
         FlutterZendeskPlugin flutterZendeskPlugin = new FlutterZendeskPlugin();
-        flutterZendeskPlugin.onAttachedToEngine(registrar.activeContext(),registrar.messenger());
+        flutterZendeskPlugin.onAttachedToEngine(registrar.activeContext(), registrar.messenger());
     }
+
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         switch (call.method) {
@@ -105,6 +111,28 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin {
                 .show(context, chatConfiguration);
 
         result.success(true);
+    }
+
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        Log.i("onAttachedToActivity", "onAttachedToActivity");
+        context = binding.getActivity();
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+        context = null;
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+        context = binding.getActivity();
+
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+        context = null;
     }
 }
 
