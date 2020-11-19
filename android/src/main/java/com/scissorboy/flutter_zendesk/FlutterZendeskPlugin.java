@@ -106,7 +106,7 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
             profileProvider.setVisitorInfo(visitorInfo, null);
             if(call.hasArgument("userName")) {
                 List<String> tags = new ArrayList<>();
-                tags.add(call.argument("appName"));
+                tags.add((String)call.argument("appName"));
                 profileProvider.addVisitorTags(tags,null);
             }
         }
