@@ -5,6 +5,9 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -101,6 +104,11 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                     .withPhoneNumber((String) call.argument("phoneNumber"))
                     .build();
             profileProvider.setVisitorInfo(visitorInfo, null);
+            if(call.hasArgument("userName")) {
+                List<String> tags = new ArrayList<>();
+                tags.add((String)call.argument("appName"));
+                profileProvider.addVisitorTags(tags,null);
+            }
         }
 
         ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
