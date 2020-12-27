@@ -93,6 +93,7 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                 .withAgentAvailabilityEnabled(true)
                 .withOfflineFormEnabled(true)
                 .withTranscriptEnabled(false)
+                .withPreChatFormEnabled(false)
                 .withChatMenuActions()
                 .build();
 
