@@ -105,11 +105,27 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                     .withPhoneNumber((String) call.argument("phoneNumber"))
                     .build();
             profileProvider.setVisitorInfo(visitorInfo, null);
+
+            List<String> tags = new ArrayList<>();
             if(call.hasArgument("userName")) {
-                List<String> tags = new ArrayList<>();
                 tags.add((String)call.argument("appName"));
+            }
+
+            if(call.hasArgument("keys")) {
+                String keyListString =  (String)call.argument("keys");
+                String[] keyList = keyListString.split(",");
+                for (String key : keyList) {
+                    if(call.hasArgument(key)) {
+                        tags.add((String)call.argument(key));
+                        Log.i(key+"java",(String)call.argument(key));
+                    }
+                }
+            }
+
+            if(tags.size() > 0) {
                 profileProvider.addVisitorTags(tags,null);
             }
+
         }
 
         ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
