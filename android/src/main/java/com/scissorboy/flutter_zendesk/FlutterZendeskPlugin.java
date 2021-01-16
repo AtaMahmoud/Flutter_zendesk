@@ -55,6 +55,9 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
             case "startChat":
                 startChat(call, result);
                 break;
+            case "disconnect":
+                disconnect();
+                break;    
             default:
                 result.notImplemented();
                 break;
@@ -153,12 +156,17 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
         context = binding.getActivity();
-
     }
 
     @Override
     public void onDetachedFromActivity() {
         context = null;
+    }
+
+    void disconnect() {
+        Chat.INSTANCE.providers().chatProvider().endChat(null);
+        Chat.INSTANCE.resetIdentity();
+        Chat.INSTANCE.clearCache();
     }
 }
 
