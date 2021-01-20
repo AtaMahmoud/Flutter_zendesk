@@ -139,6 +139,29 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                 .withEngines(ChatEngine.engine())
                 .show(context, chatConfiguration);
 
+        String order_details = "";
+        if(call.hasArgument("order_details")) {
+            order_details =  (String) call.argument("order_details");
+        }
+        Log.i("Order details","before");
+        if(order_details.length() > 0) {
+            Log.i("Order details 1",order_details);
+        final Handler handler = new Handler();
+
+        final String finalOrder_details = order_details;
+        final Runnable r = new Runnable() {
+        public void run() {
+            ChatLog.Message test = chatProvider.sendMessage(finalOrder_details);
+            Log.i("Message sent successfull",test.getMessage());
+            //handler.postDelayed(this, 5000);
+        }
+    };
+
+    handler.postDelayed(r, 5000);
+
+}
+        
+
         result.success(true);
     }
 
