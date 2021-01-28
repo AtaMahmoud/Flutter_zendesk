@@ -2,6 +2,7 @@ package com.scissorboy.flutter_zendesk;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
@@ -21,6 +22,7 @@ import io.flutter.plugin.common.BinaryMessenger;
 import zendesk.chat.Chat;
 import zendesk.chat.ChatConfiguration;
 import zendesk.chat.ChatEngine;
+import zendesk.chat.ChatLog;
 import zendesk.chat.ChatMenuAction;
 import zendesk.chat.ChatProvider;
 import zendesk.chat.PreChatFormFieldStatus;
@@ -57,7 +59,7 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                 break;
             case "disconnect":
                 disconnect();
-                break;    
+                break;
             default:
                 result.notImplemented();
                 break;
@@ -110,28 +112,28 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
             profileProvider.setVisitorInfo(visitorInfo, null);
 
             List<String> tags = new ArrayList<>();
-            if(call.hasArgument("userName")) {
-                tags.add((String)call.argument("appName"));
+            if (call.hasArgument("userName")) {
+                tags.add((String) call.argument("appName"));
             }
 
-            if(call.hasArgument("keys")) {
-                String keyListString =  (String)call.argument("keys");
+            if (call.hasArgument("keys")) {
+                String keyListString = (String) call.argument("keys");
                 String[] keyList = keyListString.split(",");
                 for (String key : keyList) {
-                    if(call.hasArgument(key)) {
-                        tags.add((String)call.argument(key));
-                        Log.i(key+"java",(String)call.argument(key));
+                    if (call.hasArgument(key)) {
+                        tags.add((String) call.argument(key));
+                        Log.i(key + "java", (String) call.argument(key));
                     }
                 }
             }
 
-            if(tags.size() > 0) {
-                profileProvider.addVisitorTags(tags,null);
+            if (tags.size() > 0) {
+                profileProvider.addVisitorTags(tags, null);
             }
 
         }
 
-        ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
+        final ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
         chatProvider.setDepartment((String) call.argument("department"), null);
 
         MessagingActivity
@@ -140,27 +142,26 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                 .show(context, chatConfiguration);
 
         String order_details = "";
-        if(call.hasArgument("order_details")) {
-            order_details =  (String) call.argument("order_details");
+        if (call.hasArgument("order_details")) {
+            order_details = (String) call.argument("order_details");
         }
-        Log.i("Order details","before");
-        if(order_details.length() > 0) {
-            Log.i("Order details 1",order_details);
-        final Handler handler = new Handler();
+        Log.i("Order details", "before");
+        if (order_details.length() > 0) {
+            Log.i("Order details 1", order_details);
+            final Handler handler = new Handler();
 
-        final String finalOrder_details = order_details;
-        final Runnable r = new Runnable() {
-        public void run() {
-            ChatLog.Message test = chatProvider.sendMessage(finalOrder_details);
-            Log.i("Message sent successfull",test.getMessage());
-            //handler.postDelayed(this, 5000);
+            final String finalOrder_details = order_details;
+            final Runnable r = new Runnable() {
+                public void run() {
+                    ChatLog.Message test = chatProvider.sendMessage(finalOrder_details);
+                    Log.i("Message sent successfully", test.getMessage());
+                }
+            };
+
+            handler.postDelayed(r, 5000);
+
         }
-    };
 
-    handler.postDelayed(r, 5000);
-
-}
-        
 
         result.success(true);
     }
