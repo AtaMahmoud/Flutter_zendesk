@@ -192,6 +192,9 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
     @Override
     public void onDetachedFromActivityForConfigChanges() {
         context = null;
+        Chat.INSTANCE.providers().chatProvider().endChat(null);
+        Chat.INSTANCE.resetIdentity();
+        Chat.INSTANCE.clearCache();
     }
 
     @Override
