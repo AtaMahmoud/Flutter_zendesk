@@ -6,6 +6,9 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
+import com.zendesk.service.ErrorResponse;
+import com.zendesk.service.ZendeskCallback;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,12 +22,15 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
+import zendesk.chat.Account;
+import zendesk.chat.AccountStatus;
 import zendesk.chat.Chat;
 import zendesk.chat.ChatConfiguration;
 import zendesk.chat.ChatEngine;
 import zendesk.chat.ChatLog;
 import zendesk.chat.ChatMenuAction;
 import zendesk.chat.ChatProvider;
+import zendesk.chat.OfflineForm;
 import zendesk.chat.PreChatFormFieldStatus;
 import zendesk.chat.ProfileProvider;
 import zendesk.chat.VisitorInfo;
@@ -90,6 +96,8 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
 
     private void startChat(MethodCall call, Result result) {
 
+        VisitorInfo visitorInfo = null;
+
         ChatConfiguration chatConfiguration = ChatConfiguration.builder()
 
                 .withNameFieldStatus(PreChatFormFieldStatus.REQUIRED)
@@ -99,12 +107,12 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                 .withOfflineFormEnabled(true)
                 .withTranscriptEnabled(false)
                 .withPreChatFormEnabled(false)
-                .withChatMenuActions()
+                .withChatMenuActions(ChatMenuAction.endChat)
                 .build();
 
         if (call.hasArgument("userName") && call.hasArgument("email")) {
             ProfileProvider profileProvider = Chat.INSTANCE.providers().profileProvider();
-            VisitorInfo visitorInfo = VisitorInfo.builder()
+             visitorInfo = VisitorInfo.builder()
                     .withName((String) call.argument("userName"))
                     .withEmail((String) call.argument("email"))
                     .withPhoneNumber((String) call.argument("phoneNumber"))
@@ -136,31 +144,40 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
         final ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
         chatProvider.setDepartment((String) call.argument("department"), null);
 
+        final String[] order_details = {""};
+        if(call.hasArgument("order_details")) {
+            order_details[0] =  (String) call.argument("order_details");
+        }
+
+        if(order_details[0].length() > 0) {
+            final VisitorInfo finalVisitorInfo = visitorInfo;
+            Chat.INSTANCE.providers().accountProvider().getAccount(new ZendeskCallback<Account>() {
+                @Override
+                public void onSuccess(Account account) {
+                    if (account.getStatus() == AccountStatus.ONLINE) {
+                        chatProvider.sendMessage(order_details[0]);
+                        order_details[0] = "";
+                    } else {
+                        OfflineForm offlineForm = OfflineForm.builder(order_details[0])
+                                .withVisitorInfo(finalVisitorInfo)
+                                .build();
+                        order_details[0] = "";
+                        Chat.INSTANCE.providers().chatProvider().sendOfflineForm(offlineForm, null);
+                    }
+                }
+
+                @Override
+                public void onError(ErrorResponse errorResponse) {
+                    Log.i("account error", errorResponse.getReason());
+                }
+            });
+        }
+
+
         MessagingActivity
                 .builder()
                 .withEngines(ChatEngine.engine())
                 .show(context, chatConfiguration);
-
-        String order_details = "";
-        if (call.hasArgument("order_details")) {
-            order_details = (String) call.argument("order_details");
-        }
-        Log.i("Order details", "before");
-        if (order_details.length() > 0) {
-            Log.i("Order details 1", order_details);
-            final Handler handler = new Handler();
-
-            final String finalOrder_details = order_details;
-            final Runnable r = new Runnable() {
-                public void run() {
-                    ChatLog.Message test = chatProvider.sendMessage(finalOrder_details);
-                    Log.i("Message sent successfully", test.getMessage());
-                }
-            };
-
-            handler.postDelayed(r, 5000);
-
-        }
 
 
         result.success(true);
