@@ -107,7 +107,7 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                 .withOfflineFormEnabled(true)
                 .withTranscriptEnabled(false)
                 .withPreChatFormEnabled(false)
-                .withChatMenuActions(ChatMenuAction.endChat)
+                .withChatMenuActions(ChatMenuAction.END_CHAT)
                 .build();
 
         if (call.hasArgument("userName") && call.hasArgument("email")) {
