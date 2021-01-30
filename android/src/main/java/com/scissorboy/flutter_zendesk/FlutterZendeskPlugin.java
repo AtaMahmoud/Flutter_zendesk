@@ -150,19 +150,12 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
         }
 
         if(order_details[0].length() > 0) {
-            final VisitorInfo finalVisitorInfo = visitorInfo;
             Chat.INSTANCE.providers().accountProvider().getAccount(new ZendeskCallback<Account>() {
                 @Override
                 public void onSuccess(Account account) {
                     if (account.getStatus() == AccountStatus.ONLINE) {
                         chatProvider.sendMessage(order_details[0]);
                         order_details[0] = "";
-                    } else {
-                        OfflineForm offlineForm = OfflineForm.builder(order_details[0])
-                                .withVisitorInfo(finalVisitorInfo)
-                                .build();
-                        order_details[0] = "";
-                        Chat.INSTANCE.providers().chatProvider().sendOfflineForm(offlineForm, null);
                     }
                 }
 
