@@ -13,4 +13,8 @@ class FlutterZendesk {
   Future<void> startChat(Map<String, String> chatConfigs) async {
     await _channel.invokeMethod("startChat", chatConfigs);
   }
+
+  Future<void> disconnect() async {
+    await _channel.invokeMethod("disconnect");
+  }
 }

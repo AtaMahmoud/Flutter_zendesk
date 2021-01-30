@@ -2,8 +2,12 @@ package com.scissorboy.flutter_zendesk;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
+
+import com.zendesk.service.ErrorResponse;
+import com.zendesk.service.ZendeskCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +22,15 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
+import zendesk.chat.Account;
+import zendesk.chat.AccountStatus;
 import zendesk.chat.Chat;
 import zendesk.chat.ChatConfiguration;
 import zendesk.chat.ChatEngine;
+import zendesk.chat.ChatLog;
 import zendesk.chat.ChatMenuAction;
 import zendesk.chat.ChatProvider;
+import zendesk.chat.OfflineForm;
 import zendesk.chat.PreChatFormFieldStatus;
 import zendesk.chat.ProfileProvider;
 import zendesk.chat.VisitorInfo;
@@ -55,6 +63,9 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
             case "startChat":
                 startChat(call, result);
                 break;
+            case "disconnect":
+                disconnect();
+                break;
             default:
                 result.notImplemented();
                 break;
@@ -85,6 +96,8 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
 
     private void startChat(MethodCall call, Result result) {
 
+        VisitorInfo visitorInfo = null;
+
         ChatConfiguration chatConfiguration = ChatConfiguration.builder()
 
                 .withNameFieldStatus(PreChatFormFieldStatus.REQUIRED)
@@ -94,12 +107,12 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
                 .withOfflineFormEnabled(true)
                 .withTranscriptEnabled(false)
                 .withPreChatFormEnabled(false)
-                .withChatMenuActions()
+                .withChatMenuActions(ChatMenuAction.END_CHAT)
                 .build();
 
         if (call.hasArgument("userName") && call.hasArgument("email")) {
             ProfileProvider profileProvider = Chat.INSTANCE.providers().profileProvider();
-            VisitorInfo visitorInfo = VisitorInfo.builder()
+             visitorInfo = VisitorInfo.builder()
                     .withName((String) call.argument("userName"))
                     .withEmail((String) call.argument("email"))
                     .withPhoneNumber((String) call.argument("phoneNumber"))
@@ -107,34 +120,58 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
             profileProvider.setVisitorInfo(visitorInfo, null);
 
             List<String> tags = new ArrayList<>();
-            if(call.hasArgument("userName")) {
-                tags.add((String)call.argument("appName"));
+            if (call.hasArgument("userName")) {
+                tags.add((String) call.argument("appName"));
             }
 
-            if(call.hasArgument("keys")) {
-                String keyListString =  (String)call.argument("keys");
+            if (call.hasArgument("keys")) {
+                String keyListString = (String) call.argument("keys");
                 String[] keyList = keyListString.split(",");
                 for (String key : keyList) {
-                    if(call.hasArgument(key)) {
-                        tags.add((String)call.argument(key));
-                        Log.i(key+"java",(String)call.argument(key));
+                    if (call.hasArgument(key)) {
+                        tags.add((String) call.argument(key));
+                        Log.i(key + "java", (String) call.argument(key));
                     }
                 }
             }
 
-            if(tags.size() > 0) {
-                profileProvider.addVisitorTags(tags,null);
+            if (tags.size() > 0) {
+                profileProvider.addVisitorTags(tags, null);
             }
 
         }
 
-        ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
+        final ChatProvider chatProvider = Chat.INSTANCE.providers().chatProvider();
         chatProvider.setDepartment((String) call.argument("department"), null);
+
+        final String[] order_details = {""};
+        if(call.hasArgument("order_details")) {
+            order_details[0] =  (String) call.argument("order_details");
+        }
+
+        if(order_details[0].length() > 0) {
+            Chat.INSTANCE.providers().accountProvider().getAccount(new ZendeskCallback<Account>() {
+                @Override
+                public void onSuccess(Account account) {
+                    if (account.getStatus() == AccountStatus.ONLINE) {
+                        chatProvider.sendMessage(order_details[0]);
+                        order_details[0] = "";
+                    }
+                }
+
+                @Override
+                public void onError(ErrorResponse errorResponse) {
+                    Log.i("account error", errorResponse.getReason());
+                }
+            });
+        }
+
 
         MessagingActivity
                 .builder()
                 .withEngines(ChatEngine.engine())
                 .show(context, chatConfiguration);
+
 
         result.success(true);
     }
@@ -148,17 +185,25 @@ public class FlutterZendeskPlugin implements MethodCallHandler, FlutterPlugin, A
     @Override
     public void onDetachedFromActivityForConfigChanges() {
         context = null;
+        Chat.INSTANCE.providers().chatProvider().endChat(null);
+        Chat.INSTANCE.resetIdentity();
+        Chat.INSTANCE.clearCache();
     }
 
     @Override
     public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
         context = binding.getActivity();
-
     }
 
     @Override
     public void onDetachedFromActivity() {
         context = null;
+    }
+
+    void disconnect() {
+        Chat.INSTANCE.providers().chatProvider().endChat(null);
+        Chat.INSTANCE.resetIdentity();
+        Chat.INSTANCE.clearCache();
     }
 }
 
